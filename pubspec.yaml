@@ -1,0 +1,62 @@
+name: fitness_nutrition_app
+description: Application complète de nutrition et fitness
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Database
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # API & Network
+  http: ^1.1.0
+  dio: ^5.4.0
+  
+  # UI Components
+  flutter_svg: ^2.0.9
+  cupertino_icons: ^1.0.6
+  google_fonts: ^6.1.0
+  fl_chart: ^0.65.0
+  intl: ^0.18.1
+  
+  # Barcode Scanner
+  mobile_scanner: ^3.5.5
+  
+  # Image & Camera
+  image_picker: ^1.0.5
+  
+  # Storage
+  shared_preferences: ^2.2.2
+  
+  # Utils
+  uuid: ^4.2.1
+  freezed_annotation: ^2.4.1
+  json_annotation: ^4.8.1
+  
+  # Animations
+  animations: ^2.0.11
+  shimmer: ^3.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  build_runner: ^2.4.7
+  freezed: ^2.4.5
+  json_serializable: ^6.7.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/svg/
+    - assets/body_parts/
