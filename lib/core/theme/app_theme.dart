@@ -6,13 +6,13 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF6C63FF);
   static const Color secondaryColor = Color(0xFFFF6584);
   static const Color accentColor = Color(0xFF00D4AA);
-  
+
   // Couleurs de nutrition
   static const Color caloriesColor = Color(0xFFFF6B6B);
   static const Color proteinColor = Color(0xFF4ECDC4);
   static const Color carbsColor = Color(0xFFFFE66D);
   static const Color fatColor = Color(0xFFFF8B94);
-  
+
   // Couleurs de fitness
   static const Color chestColor = Color(0xFFFF6B6B);
   static const Color backColor = Color(0xFF4ECDC4);
@@ -20,7 +20,7 @@ class AppTheme {
   static const Color shouldersColor = Color(0xFFFF8B94);
   static const Color armsColor = Color(0xFF95E1D3);
   static const Color coreColor = Color(0xFFC7CEEA);
-  
+
   // Couleurs de fond
   static const Color backgroundColor = Color(0xFFF8F9FA);
   static const Color cardColor = Colors.white;
@@ -32,7 +32,7 @@ class AppTheme {
     brightness: Brightness.light,
     primaryColor: primaryColor,
     scaffoldBackgroundColor: backgroundColor,
-    
+
     colorScheme: const ColorScheme.light(
       primary: primaryColor,
       secondary: secondaryColor,
@@ -40,7 +40,7 @@ class AppTheme {
       surface: cardColor,
       background: backgroundColor,
     ),
-    
+
     textTheme: GoogleFonts.interTextTheme().copyWith(
       displayLarge: GoogleFonts.inter(
         fontSize: 32,
@@ -86,15 +86,15 @@ class AppTheme {
         color: Colors.black87,
       ),
     ),
-    
-    cardTheme: CardTheme(
+
+    cardTheme: CardThemeData(
       elevation: 2,
       color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
     ),
-    
+
     appBarTheme: AppBarTheme(
       elevation: 0,
       backgroundColor: backgroundColor,
@@ -106,7 +106,7 @@ class AppTheme {
         color: Colors.black87,
       ),
     ),
-    
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
@@ -122,7 +122,7 @@ class AppTheme {
         ),
       ),
     ),
-    
+
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.grey[100],
@@ -140,7 +140,7 @@ class AppTheme {
       ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
     ),
-    
+
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
       backgroundColor: primaryColor,
       foregroundColor: Colors.white,
@@ -153,7 +153,7 @@ class AppTheme {
     brightness: Brightness.dark,
     primaryColor: primaryColor,
     scaffoldBackgroundColor: darkBackgroundColor,
-    
+
     colorScheme: const ColorScheme.dark(
       primary: primaryColor,
       secondary: secondaryColor,
@@ -161,7 +161,7 @@ class AppTheme {
       surface: darkCardColor,
       background: darkBackgroundColor,
     ),
-    
+
     textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
       displayLarge: GoogleFonts.inter(
         fontSize: 32,
@@ -197,15 +197,15 @@ class AppTheme {
         color: Colors.white70,
       ),
     ),
-    
-    cardTheme: CardTheme(
+
+    cardTheme: CardThemeData(
       elevation: 2,
       color: darkCardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
     ),
-    
+
     appBarTheme: AppBarTheme(
       elevation: 0,
       backgroundColor: darkBackgroundColor,
@@ -217,7 +217,7 @@ class AppTheme {
         color: Colors.white,
       ),
     ),
-    
+
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: primaryColor,
@@ -233,7 +233,7 @@ class AppTheme {
         ),
       ),
     ),
-    
+
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: darkCardColor,
@@ -256,24 +256,24 @@ class AppTheme {
   // Fonction helper pour obtenir la couleur d'un groupe musculaire
   static Color getMuscleGroupColor(String muscleGroup) {
     final lowerCase = muscleGroup.toLowerCase();
-    
+
     if (lowerCase.contains('pectora') || lowerCase.contains('chest')) {
       return chestColor;
     } else if (lowerCase.contains('dorsa') || lowerCase.contains('back') || lowerCase.contains('trapèze')) {
       return backColor;
-    } else if (lowerCase.contains('quadri') || lowerCase.contains('ischio') || 
-               lowerCase.contains('fessier') || lowerCase.contains('leg') || lowerCase.contains('mollet')) {
+    } else if (lowerCase.contains('quadri') || lowerCase.contains('ischio') ||
+        lowerCase.contains('fessier') || lowerCase.contains('leg') || lowerCase.contains('mollet')) {
       return legsColor;
     } else if (lowerCase.contains('deltoïde') || lowerCase.contains('shoulder') || lowerCase.contains('épaule')) {
       return shouldersColor;
-    } else if (lowerCase.contains('biceps') || lowerCase.contains('triceps') || 
-               lowerCase.contains('avant-bras') || lowerCase.contains('arm')) {
+    } else if (lowerCase.contains('biceps') || lowerCase.contains('triceps') ||
+        lowerCase.contains('avant-bras') || lowerCase.contains('arm')) {
       return armsColor;
-    } else if (lowerCase.contains('abdominaux') || lowerCase.contains('lombaire') || 
-               lowerCase.contains('core') || lowerCase.contains('abs')) {
+    } else if (lowerCase.contains('abdominaux') || lowerCase.contains('lombaire') ||
+        lowerCase.contains('core') || lowerCase.contains('abs')) {
       return coreColor;
     }
-    
+
     return primaryColor;
   }
 }
