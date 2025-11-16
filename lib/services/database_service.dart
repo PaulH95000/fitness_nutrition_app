@@ -335,6 +335,12 @@ class DatabaseService {
     return maps.map((map) => Exercise.fromMap(map)).toList();
   }
 
+  Future<void> updateExercise(Exercise exercise) async {
+    final db = await database;
+    await db.update('exercises', exercise.toMap(),
+        where: 'id = ?', whereArgs: [exercise.id]);
+  }
+
   // ==================== WORKOUT HISTORY ====================
   
   Future<List<WorkoutHistory>> getExerciseHistory(String exerciseId, {int limit = 5}) async {
