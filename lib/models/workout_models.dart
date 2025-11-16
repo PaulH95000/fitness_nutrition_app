@@ -6,8 +6,10 @@ class Exercise {
   final String equipment; // 'barbell', 'dumbbell', 'machine', 'bodyweight', 'cable', etc.
   final String difficulty; // 'beginner', 'intermediate', 'advanced'
   final String? description;
-  final String? videoUrl;
+  final String? videoUrl; // URL de la vidéo de démonstration
+  final String? thumbnailUrl; // URL de la miniature
   final bool isFavorite;
+  final bool isTimeBased; // true = exercice temporisé (ex: planche), false = basé sur les reps
 
   Exercise({
     required this.id,
@@ -18,7 +20,9 @@ class Exercise {
     required this.difficulty,
     this.description,
     this.videoUrl,
+    this.thumbnailUrl,
     this.isFavorite = false,
+    this.isTimeBased = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -31,7 +35,9 @@ class Exercise {
       'difficulty': difficulty,
       'description': description,
       'video_url': videoUrl,
+      'thumbnail_url': thumbnailUrl,
       'is_favorite': isFavorite ? 1 : 0,
+      'is_time_based': isTimeBased ? 1 : 0,
     };
   }
 
@@ -45,7 +51,9 @@ class Exercise {
       difficulty: map['difficulty'],
       description: map['description'],
       videoUrl: map['video_url'],
+      thumbnailUrl: map['thumbnail_url'],
       isFavorite: map['is_favorite'] == 1,
+      isTimeBased: map['is_time_based'] == 1,
     );
   }
 }

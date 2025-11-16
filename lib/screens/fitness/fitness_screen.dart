@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/fitness_provider.dart';
 import '../../core/theme/app_theme.dart';
-import 'workout_screen.dart';
+import 'saved_workouts_screen.dart';
+import 'create_workout_screen.dart';
 import 'body_visualization_widget.dart';
 
 class FitnessScreen extends StatefulWidget {
@@ -28,9 +29,13 @@ class _FitnessScreenState extends State<FitnessScreen> {
         title: const Text('Fitness'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.history),
+            icon: const Icon(Icons.fitness_center),
+            tooltip: 'Mes entraînements',
             onPressed: () {
-              // Naviguer vers l'historique
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SavedWorkoutsScreen()),
+              );
             },
           ),
         ],
@@ -46,103 +51,153 @@ class _FitnessScreenState extends State<FitnessScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Séance en cours
+                // Séance en cours ou Call-to-action
                 if (provider.hasActiveWorkout)
-                  _buildActiveWorkoutCard(context, provider),
-                
+                  _buildActiveWorkoutCard(context, provider)
+                else
+                  _buildEmptyStateCard(context),
+
+                const SizedBox(height: 24),
+
+                // Statistiques rapides
+                _buildQuickStats(context, provider),
+
+                const SizedBox(height: 24),
+
                 // Visualisation du corps
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Muscles travaillés',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 16),
-                        if (provider.currentWorkout != null)
+                if (provider.currentWorkout != null) ...[
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Muscles travaillés',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 16),
                           BodyVisualizationWidget(
                             muscleGroups: provider.getMuscleGroupIntensity(provider.currentWorkout!),
-                          )
-                        else
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(32),
-                              child: Text(
-                                'Commencez un entraînement pour voir les muscles travaillés',
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
                           ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
+                  const SizedBox(height: 24),
+                ],
+
+                // Mes séances sauvegardées
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Mes entraînements',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const SavedWorkoutsScreen()),
+                        );
+                      },
+                      child: const Text('Voir tout'),
+                    ),
+                  ],
                 ),
-                
-                const SizedBox(height: 20),
-                
+                const SizedBox(height: 12),
+
+                if (provider.savedWorkoutTemplates.isEmpty)
+                  _buildNoWorkoutsCard(context)
+                else
+                  ...provider.savedWorkoutTemplates.take(3).map((workout) {
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      child: ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(Icons.fitness_center, color: AppTheme.primaryColor),
+                        ),
+                        title: Text(workout.name),
+                        subtitle: Text('${workout.exercises.length} exercices • ${workout.totalSets} séries'),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SavedWorkoutsScreen()),
+                          );
+                        },
+                      ),
+                    );
+                  }),
+
+                const SizedBox(height: 24),
+
                 // Exercices par catégorie
                 Text(
-                  'Exercices',
+                  'Exercices par catégorie',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
-                
+
                 _buildCategoryCard(
                   context,
                   'Pectoraux',
                   Icons.fitness_center,
                   AppTheme.chestColor,
-                  provider.getExercisesByCategory('chest'),
+                  provider.getExercisesByCategory('chest').length,
                 ),
                 const SizedBox(height: 8),
-                
+
                 _buildCategoryCard(
                   context,
                   'Dos',
                   Icons.accessibility_new,
                   AppTheme.backColor,
-                  provider.getExercisesByCategory('back'),
+                  provider.getExercisesByCategory('back').length,
                 ),
                 const SizedBox(height: 8),
-                
+
                 _buildCategoryCard(
                   context,
                   'Jambes',
                   Icons.directions_run,
                   AppTheme.legsColor,
-                  provider.getExercisesByCategory('legs'),
+                  provider.getExercisesByCategory('legs').length,
                 ),
                 const SizedBox(height: 8),
-                
+
                 _buildCategoryCard(
                   context,
                   'Épaules',
                   Icons.hardware,
                   AppTheme.shouldersColor,
-                  provider.getExercisesByCategory('shoulders'),
+                  provider.getExercisesByCategory('shoulders').length,
                 ),
                 const SizedBox(height: 8),
-                
+
                 _buildCategoryCard(
                   context,
                   'Bras',
                   Icons.sports_martial_arts,
                   AppTheme.armsColor,
-                  provider.getExercisesByCategory('arms'),
+                  provider.getExercisesByCategory('arms').length,
                 ),
                 const SizedBox(height: 8),
-                
+
                 _buildCategoryCard(
                   context,
                   'Abdos',
                   Icons.whatshot,
                   AppTheme.coreColor,
-                  provider.getExercisesByCategory('core'),
+                  provider.getExercisesByCategory('core').length,
                 ),
-                
+
                 const SizedBox(height: 80),
               ],
             ),
@@ -153,7 +208,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const WorkoutScreen()),
+            MaterialPageRoute(builder: (_) => const CreateWorkoutScreen()),
           );
         },
         icon: const Icon(Icons.add),
@@ -162,61 +217,132 @@ class _FitnessScreenState extends State<FitnessScreen> {
     );
   }
 
+  Widget _buildEmptyStateCard(BuildContext context) {
+    return Card(
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.fitness_center,
+                size: 64,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Prêt à vous entraîner ?',
+              style: Theme.of(context).textTheme.headlineMedium,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Créez votre première séance d\'entraînement personnalisée ou choisissez parmi vos séances sauvegardées',
+              style: TextStyle(color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const CreateWorkoutScreen()),
+                    );
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Créer une séance'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildActiveWorkoutCard(BuildContext context, FitnessProvider provider) {
     final workout = provider.currentWorkout!;
-    
+
     return Card(
-      color: AppTheme.primaryColor.withOpacity(0.1),
+      color: AppTheme.accentColor.withOpacity(0.1),
       child: InkWell(
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const WorkoutScreen()),
-          );
+          // TODO: Naviguer vers la séance en cours
         },
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppTheme.accentColor,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.play_arrow, color: Colors.white),
+                    child: const Icon(Icons.play_arrow, color: Colors.white, size: 28),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Séance en cours',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                         ),
+                        const SizedBox(height: 4),
                         Text(
                           workout.name,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               LinearProgressIndicator(
                 value: workout.progress,
                 backgroundColor: Colors.grey[300],
                 valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                minHeight: 8,
               ),
-              const SizedBox(height: 8),
-              Text(
-                '${workout.completedSets} / ${workout.totalSets} séries complétées',
-                style: TextStyle(color: Colors.grey[700], fontSize: 12),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${workout.completedSets} / ${workout.totalSets} séries',
+                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      // TODO: Reprendre la séance
+                    },
+                    icon: const Icon(Icons.play_arrow, size: 18),
+                    label: const Text('Continuer'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.accentColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -225,154 +351,104 @@ class _FitnessScreenState extends State<FitnessScreen> {
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, String title, IconData icon, Color color, List exercises) {
+  Widget _buildQuickStats(BuildContext context, FitnessProvider provider) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            context,
+            'Exercices',
+            provider.exercises.length.toString(),
+            Icons.fitness_center,
+            AppTheme.primaryColor,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildStatCard(
+            context,
+            'Entraînements',
+            provider.savedWorkoutTemplates.length.toString(),
+            Icons.list,
+            AppTheme.accentColor,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(BuildContext context, String label, String value, IconData icon, Color color) {
     return Card(
-      child: InkWell(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNoWorkoutsCard(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            Icon(Icons.fitness_center_outlined, size: 48, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              'Aucun entraînement enregistré',
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CreateWorkoutScreen()),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Créer mon premier'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryCard(BuildContext context, String title, IconData icon, Color color, int count) {
+    return Card(
+      child: ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: color, size: 24),
+        ),
+        title: Text(title),
+        subtitle: Text('$count exercices'),
+        trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          _showExercisesList(context, title, exercises);
+          // TODO: Naviguer vers la liste des exercices de cette catégorie
         },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(icon, color: color, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                    Text(
-                      '${exercises.length} exercices',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showExercisesList(BuildContext context, String category, List exercises) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        minChildSize: 0.5,
-        maxChildSize: 0.95,
-        expand: false,
-        builder: (context, scrollController) {
-          return Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  category,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemCount: exercises.length,
-                  itemBuilder: (context, index) {
-                    final exercise = exercises[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: AppTheme.getMuscleGroupColor(exercise.category).withOpacity(0.2),
-                        child: Icon(
-                          Icons.fitness_center,
-                          color: AppTheme.getMuscleGroupColor(exercise.category),
-                        ),
-                      ),
-                      title: Text(exercise.name),
-                      subtitle: Text(exercise.muscleGroups.join(', ')),
-                      trailing: IconButton(
-                        icon: Icon(
-                          exercise.isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: exercise.isFavorite ? Colors.red : null,
-                        ),
-                        onPressed: () {
-                          // Toggle favorite
-                        },
-                      ),
-                      onTap: () async {
-                        // Afficher l'historique de l'exercice
-                        final history = await context.read<FitnessProvider>().getExerciseHistory(exercise.id);
-                        if (context.mounted) {
-                          _showExerciseHistory(context, exercise, history);
-                        }
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  void _showExerciseHistory(BuildContext context, exercise, List history) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(exercise.name),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: history.isEmpty
-              ? const Text('Aucun historique disponible')
-              : ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: history.length,
-                  itemBuilder: (context, index) {
-                    final record = history[index];
-                    return Card(
-                      child: ListTile(
-                        title: Text(
-                          '${record.sets.length} séries',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            ...record.sets.map((set) => Text(
-                              '${set.weight}kg × ${set.reps} reps',
-                              style: const TextStyle(fontSize: 12),
-                            )),
-                          ],
-                        ),
-                        trailing: Text(
-                          '${record.performedAt.day}/${record.performedAt.month}',
-                          style: TextStyle(color: Colors.grey[600]),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
-          ),
-        ],
       ),
     );
   }
