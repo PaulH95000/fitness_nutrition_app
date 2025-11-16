@@ -31,13 +31,33 @@ class NutritionProvider extends ChangeNotifier {
   double get todayFat => _todayMeals.fold(0, (sum, meal) => sum + meal.totalFat);
 
   Future<void> loadTodayMeals() async {
+    await loadMealsForDate(DateTime.now());
+  }
+
+  Future<void> loadMealsForDate(DateTime date) async {
     _isLoading = true;
     notifyListeners();
 
     try {
-      _todayMeals = await DatabaseService.instance.getMealEntriesForDate(DateTime.now());
+      _todayMeals = await DatabaseService.instance.getMealEntriesForDate(date);
     } catch (e) {
       print('Erreur lors du chargement des repas: $e');
+    }
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> loadWeeklyData() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      // TODO: Implémenter le chargement des données hebdomadaires
+      // Pour l'instant, juste simuler le chargement
+      await Future.delayed(const Duration(milliseconds: 500));
+    } catch (e) {
+      print('Erreur lors du chargement des données hebdomadaires: $e');
     }
 
     _isLoading = false;

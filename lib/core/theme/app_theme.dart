@@ -6,6 +6,9 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF6C63FF);
   static const Color secondaryColor = Color(0xFFFF6584);
   static const Color accentColor = Color(0xFF00D4AA);
+  static const Color successColor = Color(0xFF4CAF50);
+  static const Color warningColor = Color(0xFFFF9800);
+  static const Color errorColor = Color(0xFFF44336);
 
   // Couleurs de nutrition
   static const Color caloriesColor = Color(0xFFFF6B6B);

@@ -6,7 +6,14 @@ import '../../models/food_item.dart';
 import '../../core/theme/app_theme.dart';
 
 class AddMealScreen extends StatefulWidget {
-  const AddMealScreen({super.key});
+  final DateTime? selectedDate;
+  final String? initialMealType;
+
+  const AddMealScreen({
+    super.key,
+    this.selectedDate,
+    this.initialMealType,
+  });
 
   @override
   State<AddMealScreen> createState() => _AddMealScreenState();
@@ -14,8 +21,14 @@ class AddMealScreen extends StatefulWidget {
 
 class _AddMealScreenState extends State<AddMealScreen> {
   final _searchController = TextEditingController();
-  String _selectedMealType = 'breakfast';
+  late String _selectedMealType;
   bool _showScanner = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedMealType = widget.initialMealType ?? 'breakfast';
+  }
 
   @override
   void dispose() {

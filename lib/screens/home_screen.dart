@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'nutrition/nutrition_screen.dart';
+import 'nutrition/nutrition_screen_v2.dart';
 import 'fitness/fitness_screen.dart';
 import 'profile/profile_screen.dart';
 
@@ -14,7 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const NutritionScreen(),
+    const NutritionScreenV2(),
     const FitnessScreen(),
     const ProfileScreen(),
   ];
