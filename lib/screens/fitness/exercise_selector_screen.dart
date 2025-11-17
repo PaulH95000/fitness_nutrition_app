@@ -6,7 +6,9 @@ import '../../core/theme/app_theme.dart';
 
 /// Écran de sélection d'exercices avec recherche avancée et filtres
 class ExerciseSelectorScreen extends StatefulWidget {
-  const ExerciseSelectorScreen({super.key});
+  final String? initialCategory;
+
+  const ExerciseSelectorScreen({super.key, this.initialCategory});
 
   @override
   State<ExerciseSelectorScreen> createState() => _ExerciseSelectorScreenState();
@@ -18,6 +20,12 @@ class _ExerciseSelectorScreenState extends State<ExerciseSelectorScreen> {
   String? _selectedEquipment;
   String? _selectedDifficulty;
   bool _showFavoritesOnly = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedCategory = widget.initialCategory;
+  }
 
   @override
   void dispose() {

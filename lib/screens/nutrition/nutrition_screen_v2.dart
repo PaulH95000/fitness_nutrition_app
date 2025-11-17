@@ -8,6 +8,7 @@ import '../../core/theme/app_theme.dart';
 import 'add_meal_screen.dart';
 import 'meal_planner_screen.dart';
 import 'weekly_report_screen.dart';
+import 'nutrition_goals_screen.dart';
 
 /// Interface Nutrition inspirée de MyFitnessPal
 /// Design moderne, clair et intuitif
@@ -76,6 +77,16 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MealPlannerScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings, color: AppTheme.primaryColor),
+            tooltip: 'Objectifs',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NutritionGoalsScreen()),
               );
             },
           ),
@@ -204,11 +215,11 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
           ),
           const SizedBox(width: 16),
           IconButton(
-            icon: Icon(
+            icon: const Icon(
               Icons.chevron_right,
-              color: _isToday ? Colors.grey : Colors.black87,
+              color: Colors.black87,
             ),
-            onPressed: _isToday ? null : () => _changeDate(1),
+            onPressed: () => _changeDate(1),
           ),
         ],
       ),

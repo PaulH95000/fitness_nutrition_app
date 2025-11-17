@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import 'saved_workouts_screen.dart';
 import 'create_workout_screen.dart';
 import 'body_visualization_widget.dart';
+import 'exercise_selector_screen.dart';
 
 class FitnessScreen extends StatefulWidget {
   const FitnessScreen({super.key});
@@ -151,6 +152,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.fitness_center,
                   AppTheme.chestColor,
                   provider.getExercisesByCategory('chest').length,
+                  'chest',
                 ),
                 const SizedBox(height: 8),
 
@@ -160,6 +162,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.accessibility_new,
                   AppTheme.backColor,
                   provider.getExercisesByCategory('back').length,
+                  'back',
                 ),
                 const SizedBox(height: 8),
 
@@ -169,6 +172,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.directions_run,
                   AppTheme.legsColor,
                   provider.getExercisesByCategory('legs').length,
+                  'legs',
                 ),
                 const SizedBox(height: 8),
 
@@ -178,6 +182,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.hardware,
                   AppTheme.shouldersColor,
                   provider.getExercisesByCategory('shoulders').length,
+                  'shoulders',
                 ),
                 const SizedBox(height: 8),
 
@@ -187,6 +192,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.sports_martial_arts,
                   AppTheme.armsColor,
                   provider.getExercisesByCategory('arms').length,
+                  'arms',
                 ),
                 const SizedBox(height: 8),
 
@@ -196,6 +202,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   Icons.whatshot,
                   AppTheme.coreColor,
                   provider.getExercisesByCategory('core').length,
+                  'core',
                 ),
 
                 const SizedBox(height: 80),
@@ -432,7 +439,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
     );
   }
 
-  Widget _buildCategoryCard(BuildContext context, String title, IconData icon, Color color, int count) {
+  Widget _buildCategoryCard(BuildContext context, String title, IconData icon, Color color, int count, String categoryId) {
     return Card(
       child: ListTile(
         leading: Container(
@@ -447,7 +454,12 @@ class _FitnessScreenState extends State<FitnessScreen> {
         subtitle: Text('$count exercices'),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          // TODO: Naviguer vers la liste des exercices de cette catégorie
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => ExerciseSelectorScreen(initialCategory: categoryId),
+            ),
+          );
         },
       ),
     );

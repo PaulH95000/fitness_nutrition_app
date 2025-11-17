@@ -69,13 +69,16 @@ class _AddMealScreenState extends State<AddMealScreen> {
                           ? IconButton(
                               icon: const Icon(Icons.clear),
                               onPressed: () {
-                                _searchController.clear();
+                                setState(() {
+                                  _searchController.clear();
+                                });
                                 context.read<NutritionProvider>().searchFood('');
                               },
                             )
                           : null,
                     ),
                     onChanged: (value) {
+                      setState(() {}); // Force rebuild to update UI
                       context.read<NutritionProvider>().searchFood(value);
                     },
                   ),
