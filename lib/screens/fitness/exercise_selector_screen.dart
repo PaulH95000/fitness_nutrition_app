@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../../providers/fitness_provider.dart';
 import '../../models/workout_models.dart';
 import '../../core/theme/app_theme.dart';
+import 'create_custom_exercise_screen.dart';
 
 /// Écran de sélection d'exercices avec recherche avancée et filtres
 class ExerciseSelectorScreen extends StatefulWidget {
@@ -85,6 +86,21 @@ class _ExerciseSelectorScreenState extends State<ExerciseSelectorScreen> {
               });
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline),
+            tooltip: 'Créer un exercice',
+            onPressed: () async {
+              final exercise = await Navigator.push<Exercise>(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CreateCustomExerciseScreen(),
+                ),
+              );
+              if (exercise != null && mounted) {
+                Navigator.pop(context, exercise);
+              }
+            },
+          ),
         ],
       ),
       body: Column(
@@ -113,6 +129,42 @@ class _ExerciseSelectorScreenState extends State<ExerciseSelectorScreen> {
               },
             ),
           ),
+
+          // Que voulez-vous travailler?
+          if (_selectedCategory == null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Que voulez-vous travailler ?',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildMuscleGroupButton('Pectoraux', Icons.accessibility_new, 'chest', AppTheme.chestColor),
+                      _buildMuscleGroupButton('Dos', Icons.accessible_forward, 'back', AppTheme.backColor),
+                      _buildMuscleGroupButton('Jambes', Icons.directions_run, 'legs', AppTheme.legsColor),
+                      _buildMuscleGroupButton('Bras', Icons.sports_martial_arts, 'arms', AppTheme.armsColor),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _buildMuscleGroupButton('Épaules', Icons.hardware, 'shoulders', AppTheme.shouldersColor),
+                      _buildMuscleGroupButton('Abdos', Icons.whatshot, 'core', AppTheme.coreColor),
+                      _buildMuscleGroupButton('Cardio', Icons.favorite, Colors.red),
+                      const SizedBox(width: 72), // Spacer pour alignement
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
 
           // Filtres
           SizedBox(
@@ -466,5 +518,42 @@ class _ExerciseSelectorScreenState extends State<ExerciseSelectorScreen> {
       default:
         return AppTheme.primaryColor;
     }
+  }
+
+  Widget _buildMuscleGroupButton(String label, IconData icon, String category, [Color? color]) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedCategory = category;
+        });
+      },
+      child: Column(
+        children: [
+          Container(
+            width: 68,
+            height: 68,
+            decoration: BoxDecoration(
+              color: (color ?? AppTheme.primaryColor).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: (color ?? AppTheme.primaryColor).withOpacity(0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              icon,
+              size: 32,
+              color: color ?? AppTheme.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -401,6 +401,17 @@ class FitnessProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> addCustomExercise(Exercise exercise) async {
+    _exercises.add(exercise);
+    notifyListeners();
+
+    try {
+      await DatabaseService.instance.insertExercise(exercise);
+    } catch (e) {
+      print('Erreur lors de l\'ajout de l\'exercice personnalisé: $e');
+    }
+  }
+
   Future<List<WorkoutHistory>> getExerciseHistory(String exerciseId) async {
     try {
       return await DatabaseService.instance.getExerciseHistory(exerciseId, limit: 5);

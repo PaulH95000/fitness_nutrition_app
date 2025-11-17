@@ -351,17 +351,19 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
             children: [
               Expanded(
                 child: _buildStreakItem(
-                  '🔥',
+                  Icons.local_fire_department,
                   '7 jours',
                   'Objectif calorique',
+                  Colors.orange,
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: _buildStreakItem(
-                  '💪',
+                  Icons.fitness_center,
                   '5 jours',
                   'Objectif protéines',
+                  AppTheme.accentColor,
                 ),
               ),
             ],
@@ -440,26 +442,27 @@ class _WeeklyReportScreenState extends State<WeeklyReportScreen> {
     );
   }
 
-  Widget _buildStreakItem(String emoji, String days, String label) {
+  Widget _buildStreakItem(IconData icon, String days, String label, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.accentColor.withOpacity(0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 32),
+          Icon(
+            icon,
+            size: 32,
+            color: color,
           ),
           const SizedBox(height: 8),
           Text(
             days,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppTheme.accentColor,
+              color: color,
             ),
           ),
           const SizedBox(height: 4),
