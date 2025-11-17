@@ -85,7 +85,12 @@ class _NutritionGoalsScreenState extends State<NutritionGoalsScreen> {
         updatedAt: DateTime.now(),
       );
 
-      await userProvider.updateUserProfile(updatedProfile);
+      await userProvider.updateUserProfile(
+        dailyCaloriesTarget: updatedProfile.dailyCaloriesTarget,
+        proteinTarget: updatedProfile.proteinTarget,
+        carbsTarget: updatedProfile.carbsTarget,
+        fatTarget: updatedProfile.fatTarget,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

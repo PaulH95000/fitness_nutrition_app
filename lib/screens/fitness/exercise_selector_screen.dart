@@ -157,7 +157,7 @@ class _ExerciseSelectorScreenState extends State<ExerciseSelectorScreen> {
                     children: [
                       _buildMuscleGroupButton('Épaules', Icons.hardware, 'shoulders', AppTheme.shouldersColor),
                       _buildMuscleGroupButton('Abdos', Icons.whatshot, 'core', AppTheme.coreColor),
-                      _buildMuscleGroupButton('Cardio', Icons.favorite, Colors.red),
+                      _buildMuscleGroupButton('Cardio', Icons.favorite, 'cardio', Colors.red),
                       const SizedBox(width: 72), // Spacer pour alignement
                     ],
                   ),
