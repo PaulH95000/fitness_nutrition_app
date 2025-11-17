@@ -21,6 +21,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
   late TextEditingController _nameController;
   late List<WorkoutExercise> _selectedExercises;
   bool _isEditMode = false;
+  int _defaultRestSeconds = 120; // 2 minutes par défaut
 
   @override
   void initState() {
@@ -30,6 +31,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       text: widget.workoutToEdit?.name ?? 'Séance du ${DateTime.now().day}/${DateTime.now().month}',
     );
     _selectedExercises = widget.workoutToEdit?.exercises.map((e) => e).toList() ?? [];
+    _defaultRestSeconds = widget.workoutToEdit?.defaultRestSeconds ?? 120;
   }
 
   @override
@@ -50,7 +52,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
               id: _uuid.v4(),
               weight: 0,
               reps: 10,
-              restSeconds: 120, // 2 minutes par défaut
+              restSeconds: _defaultRestSeconds, // Utiliser le temps de repos global
             ),
           ),
           order: _selectedExercises.length,
@@ -142,6 +144,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       id: widget.workoutToEdit?.id ?? _uuid.v4(),
       name: _nameController.text,
       exercises: _selectedExercises,
+      defaultRestSeconds: _defaultRestSeconds,
     );
 
     final provider = context.read<FitnessProvider>();
@@ -174,15 +177,91 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
       ),
       body: Column(
         children: [
-          // Nom de la séance
+          // Configuration de la séance
           Padding(
             padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nom de la séance',
-                prefixIcon: Icon(Icons.edit),
-              ),
+            child: Column(
+              children: [
+                // Nom de la séance
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Nom de la séance',
+                    prefixIcon: Icon(Icons.edit),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Temps de repos global
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.accentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.accentColor.withOpacity(0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.timer, size: 20, color: AppTheme.primaryColor),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Temps de repos global',
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Temps par défaut entre chaque série (modifiable individuellement)',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (_defaultRestSeconds > 30) {
+                                  _defaultRestSeconds -= 15;
+                                }
+                              });
+                            },
+                            icon: const Icon(Icons.remove_circle_outline),
+                            color: AppTheme.primaryColor,
+                          ),
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                '${(_defaultRestSeconds / 60).floor()}m ${_defaultRestSeconds % 60}s',
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              setState(() {
+                                if (_defaultRestSeconds < 300) {
+                                  _defaultRestSeconds += 15;
+                                }
+                              });
+                            },
+                            icon: const Icon(Icons.add_circle_outline),
+                            color: AppTheme.primaryColor,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 

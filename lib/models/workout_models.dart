@@ -147,6 +147,7 @@ class Workout {
   final DateTime? completedAt;
   final int durationMinutes;
   final String? notes;
+  final int defaultRestSeconds; // Temps de repos par défaut pour toute la séance
 
   Workout({
     required this.id,
@@ -156,6 +157,7 @@ class Workout {
     this.completedAt,
     this.durationMinutes = 0,
     this.notes,
+    this.defaultRestSeconds = 120, // 2 minutes par défaut
   });
 
   bool get isCompleted => completedAt != null;
@@ -184,6 +186,7 @@ class Workout {
       'completed_at': completedAt?.toIso8601String(),
       'duration_minutes': durationMinutes,
       'notes': notes,
+      'default_rest_seconds': defaultRestSeconds,
     };
   }
 }

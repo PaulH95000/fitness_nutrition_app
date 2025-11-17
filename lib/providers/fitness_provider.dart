@@ -256,6 +256,7 @@ class FitnessProvider extends ChangeNotifier {
     final duplicated = Workout(
       id: _uuid.v4(),
       name: '${workout.name} (Copie)',
+      defaultRestSeconds: workout.defaultRestSeconds,
       exercises: workout.exercises.map((e) {
         return WorkoutExercise(
           id: _uuid.v4(),
@@ -282,6 +283,7 @@ class FitnessProvider extends ChangeNotifier {
     final sessionWorkout = Workout(
       id: _uuid.v4(),
       name: template.name,
+      defaultRestSeconds: template.defaultRestSeconds,
       exercises: template.exercises.map((e) {
         return WorkoutExercise(
           id: _uuid.v4(),

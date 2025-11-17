@@ -237,8 +237,8 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
             child: _isResting ? _buildRestView() : _buildExerciseView(),
           ),
 
-          // "Up Next" - Aperçu du prochain exercice
-          if (!_isResting && _nextExercise != null)
+          // "Up Next" - Aperçu de la prochaine série ou du prochain exercice
+          if (!_isResting && (!_isLastSet || _nextExercise != null))
             _buildUpNextCard(),
 
           // Contrôles
@@ -441,127 +441,260 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
   }
 
   Widget _buildRestView() {
-    return Container(
-      padding: const EdgeInsets.all(32),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.timelapse, size: 80, color: AppTheme.accentColor),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
+          const Icon(Icons.timelapse, size: 64, color: AppTheme.accentColor),
+          const SizedBox(height: 16),
           const Text('Repos', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Timer circulaire
           SizedBox(
-            width: 200,
-            height: 200,
+            width: 180,
+            height: 180,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 SizedBox(
-                  width: 200,
-                  height: 200,
+                  width: 180,
+                  height: 180,
                   child: CircularProgressIndicator(
                     value: (_currentSet.restSeconds != null && _currentSet.restSeconds! > 0)
                         ? 1 - (_restSecondsRemaining / _currentSet.restSeconds!)
                         : 0,
-                    strokeWidth: 12,
+                    strokeWidth: 10,
                     backgroundColor: Colors.grey[200],
                     valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
                   ),
                 ),
                 Text(
                   _formatRestTime(_restSecondsRemaining),
-                  style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Contrôles de temps
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton.filled(
+              ElevatedButton.icon(
                 onPressed: () => _adjustRestTime(-10),
-                icon: const Icon(Icons.remove),
-                style: IconButton.styleFrom(
+                icon: const Icon(Icons.remove, size: 20),
+                label: const Text('-10s'),
+                style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[300],
                   foregroundColor: Colors.black87,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text('-10s', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 32),
-              const Text('+10s', style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(width: 12),
-              IconButton.filled(
+              const SizedBox(width: 16),
+              ElevatedButton.icon(
                 onPressed: () => _adjustRestTime(10),
-                icon: const Icon(Icons.add),
-                style: IconButton.styleFrom(
+                icon: const Icon(Icons.add, size: 20),
+                label: const Text('+10s'),
+                style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.grey[300],
                   foregroundColor: Colors.black87,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
             ],
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
 
-          ElevatedButton(
-            onPressed: _skipRest,
-            child: const Text('Passer le repos'),
+          // Modifier les détails de la série juste effectuée
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.edit, size: 20, color: AppTheme.primaryColor),
+                      const SizedBox(width: 8),
+                      const Text('Série effectuée', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Poids (kg)', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                            const SizedBox(height: 4),
+                            TextFormField(
+                              initialValue: _currentSet.weight.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                                contentPadding: EdgeInsets.all(12),
+                              ),
+                              onChanged: (value) {
+                                final weight = double.tryParse(value);
+                                if (weight != null) {
+                                  setState(() {
+                                    _currentExercise.sets[_currentSetIndex] =
+                                      _currentSet.copyWith(weight: weight);
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Reps', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                            const SizedBox(height: 4),
+                            TextFormField(
+                              initialValue: _currentSet.reps.toString(),
+                              keyboardType: TextInputType.number,
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                isDense: true,
+                                contentPadding: EdgeInsets.all(12),
+                              ),
+                              onChanged: (value) {
+                                final reps = int.tryParse(value);
+                                if (reps != null) {
+                                  setState(() {
+                                    _currentExercise.sets[_currentSetIndex] =
+                                      _currentSet.copyWith(reps: reps);
+                                  });
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
+
+          const SizedBox(height: 20),
         ],
       ),
     );
   }
 
   Widget _buildUpNextCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withOpacity(0.05),
-        border: Border(top: BorderSide(color: Colors.grey[300]!)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text('Prochain exercice', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppTheme.getMuscleGroupColor(_nextExercise!.exercise.category).withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(8),
+    // Si on n'est pas à la dernière série, afficher la prochaine série
+    if (!_isLastSet) {
+      final nextSetNumber = _currentSetIndex + 2; // +2 car index commence à 0 et on veut la suivante
+      final totalSets = _currentExercise.sets.length;
+      final nextSet = _currentExercise.sets[_currentSetIndex + 1];
+
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.accentColor.withOpacity(0.1),
+          border: Border(top: BorderSide(color: Colors.grey[300]!)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.arrow_forward, size: 16, color: AppTheme.primaryColor),
+                const SizedBox(width: 8),
+                Text(
+                  'Prochaine série: $nextSetNumber/$totalSets',
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-                child: Icon(
-                  Icons.fitness_center,
-                  color: AppTheme.getMuscleGroupColor(_nextExercise!.exercise.category),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildNextSetInfo('Poids', '${nextSet.weight} kg'),
+                _buildNextSetInfo('Reps', '${nextSet.reps}'),
+                if (nextSet.restSeconds != null)
+                  _buildNextSetInfo('Repos', '${nextSet.restSeconds}s'),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Sinon, afficher le prochain exercice s'il existe
+    if (_nextExercise != null) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppTheme.primaryColor.withOpacity(0.05),
+          border: Border(top: BorderSide(color: Colors.grey[300]!)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Prochain exercice', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: AppTheme.getMuscleGroupColor(_nextExercise!.exercise.category).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.fitness_center,
+                    color: AppTheme.getMuscleGroupColor(_nextExercise!.exercise.category),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(_nextExercise!.exercise.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    Text(
-                      '${_nextExercise!.sets.length} séries',
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(_nextExercise!.exercise.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      Text(
+                        '${_nextExercise!.sets.length} séries',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildNextSetInfo(String label, String value) {
+    return Column(
+      children: [
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 
