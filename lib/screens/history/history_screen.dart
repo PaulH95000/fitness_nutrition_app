@@ -32,7 +32,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
     _initPedometer();
   }
 
@@ -126,6 +126,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppTheme.primaryColor,
           tabs: const [
+            Tab(icon: Icon(Icons.dashboard_outlined), text: 'Vue d\'ensemble'),
             Tab(icon: Icon(Icons.monitor_weight), text: 'Poids'),
             Tab(icon: Icon(Icons.local_fire_department), text: 'Calories'),
             Tab(icon: Icon(Icons.directions_walk), text: 'Pas'),
@@ -135,12 +136,279 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
       body: TabBarView(
         controller: _tabController,
         children: [
+          _buildOverviewTab(),
           _buildWeightTab(),
           _buildCaloriesTab(),
           _buildStepsTab(),
         ],
       ),
     );
+  }
+
+  Widget _buildOverviewTab() {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _getOverviewData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final data = snapshot.data ?? {};
+        final latestWeight = data['latestWeight'] as double?;
+        final weekCaloriesAvg = data['weekCaloriesAvg'] as double? ?? 0;
+        final todaySteps = int.tryParse(_steps) ?? 0;
+        final historyItems = data['historyItems'] as List<Map<String, dynamic>>? ?? [];
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Cartes de résumé
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Poids actuel',
+                      latestWeight != null ? '${latestWeight.toStringAsFixed(1)} kg' : '-',
+                      Icons.monitor_weight,
+                      AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Cals moy/sem',
+                      '${weekCaloriesAvg.toInt()} kcal',
+                      Icons.local_fire_department,
+                      Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Pas aujourd\'hui',
+                      todaySteps > 100000 ? '?' : todaySteps.toString(),
+                      Icons.directions_walk,
+                      Colors.blue,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMetricCard(
+                      'Historique',
+                      '${historyItems.length} jours',
+                      Icons.calendar_today,
+                      Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              // Liste chronologique des dernières activités
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.05),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Text(
+                        'Activité récente',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                    if (historyItems.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.all(20),
+                        child: Center(
+                          child: Text(
+                            'Aucune donnée disponible.\nCommencez à enregistrer votre progression !',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                        ),
+                      )
+                    else
+                      ...historyItems.take(10).map((item) {
+                        final date = DateTime.parse(item['date'] as String);
+                        final type = item['type'] as String;
+                        final value = item['value'] as String;
+                        final icon = item['icon'] as IconData;
+                        final color = item['color'] as Color;
+
+                        return Container(
+                          decoration: BoxDecoration(
+                            border: Border(
+                              top: BorderSide(color: Colors.grey[200]!),
+                            ),
+                          ),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: color.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(icon, color: color, size: 24),
+                            ),
+                            title: Text(
+                              type,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black87,
+                              ),
+                            ),
+                            subtitle: Text(
+                              DateFormat('EEEE d MMM, HH:mm', 'fr_FR').format(date),
+                              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+                            ),
+                            trailing: Text(
+                              value,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: color,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMetricCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: color, size: 28),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<Map<String, dynamic>> _getOverviewData() async {
+    // Récupérer le dernier poids
+    final weightHistory = await DatabaseService.instance.getWeightHistory(limit: 1);
+    final latestWeight = weightHistory.isNotEmpty ? weightHistory.first['weight'] as double : null;
+
+    // Calculer la moyenne des calories de la semaine
+    final now = DateTime.now();
+    final sevenDaysAgo = now.subtract(const Duration(days: 7));
+    double totalCalories = 0;
+    int daysWithData = 0;
+
+    for (int i = 0; i < 7; i++) {
+      final date = sevenDaysAgo.add(Duration(days: i));
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
+
+      final meals = await DatabaseService.instance.getMealEntriesByDateRange(startOfDay, endOfDay);
+      if (meals.isNotEmpty) {
+        daysWithData++;
+        for (final meal in meals) {
+          totalCalories += meal.totalCalories;
+        }
+      }
+    }
+
+    final weekCaloriesAvg = daysWithData > 0 ? totalCalories / daysWithData : 0;
+
+    // Créer une liste d'activités récentes combinées
+    final historyItems = <Map<String, dynamic>>[];
+
+    // Ajouter les poids récents
+    final weights = await DatabaseService.instance.getWeightHistory(limit: 5);
+    for (final w in weights) {
+      historyItems.add({
+        'date': w['recorded_at'],
+        'type': 'Poids enregistré',
+        'value': '${(w['weight'] as double).toStringAsFixed(1)} kg',
+        'icon': Icons.monitor_weight,
+        'color': AppTheme.primaryColor,
+      });
+    }
+
+    // Ajouter les jours avec calories
+    final caloriesHistory = await _getCaloriesHistory();
+    for (final c in caloriesHistory.take(5)) {
+      historyItems.add({
+        'date': c['date'],
+        'type': 'Nutrition',
+        'value': '${(c['calories'] as double).toInt()} kcal',
+        'icon': Icons.local_fire_department,
+        'color': Colors.orange,
+      });
+    }
+
+    // Trier par date décroissante
+    historyItems.sort((a, b) {
+      final dateA = DateTime.parse(a['date'] as String);
+      final dateB = DateTime.parse(b['date'] as String);
+      return dateB.compareTo(dateA);
+    });
+
+    return {
+      'latestWeight': latestWeight,
+      'weekCaloriesAvg': weekCaloriesAvg,
+      'historyItems': historyItems,
+    };
   }
 
   Widget _buildWeightTab() {
@@ -221,7 +489,7 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                             borderData: FlBorderData(show: true),
                             lineBarsData: [
                               LineChartBarData(
-                                spots: weightHistory.asMap().entries.map((entry) {
+                                spots: weightHistory.reversed.toList().asMap().entries.map((entry) {
                                   return FlSpot(
                                     entry.key.toDouble(),
                                     entry.value['weight'] as double,
@@ -278,7 +546,11 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
                         ),
                         title: Text(
                           DateFormat('EEEE d MMM yyyy', 'fr_FR').format(date),
-                          style: const TextStyle(fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                            fontSize: 15,
+                          ),
                         ),
                         trailing: Text(
                           '${weight.toStringAsFixed(1)} kg',

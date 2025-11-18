@@ -484,7 +484,11 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
             ),
             title: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+                color: Colors.black87,
+              ),
             ),
             trailing: Column(
               mainAxisAlignment: MainAxisAlignment.center,

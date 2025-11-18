@@ -23,7 +23,7 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
     );
@@ -195,22 +195,78 @@ class DatabaseService {
   }
 
   Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    print('🔄 DB Migration: from version $oldVersion to $newVersion');
+
     if (oldVersion < 2) {
-      // Ajouter le champ is_rest_time_modified à la table workout_sets
+      print('🔄 Migrating to v2: Adding is_rest_time_modified to workout_sets');
       await db.execute('ALTER TABLE workout_sets ADD COLUMN is_rest_time_modified INTEGER DEFAULT 0');
 
       // Ajouter les colonnes manquantes à la table exercises
       try {
         await db.execute('ALTER TABLE exercises ADD COLUMN thumbnail_url TEXT');
+        print('🔄 Added thumbnail_url column');
       } catch (e) {
-        print('Column thumbnail_url already exists or error: $e');
+        print('⚠️ Column thumbnail_url error: $e');
       }
 
       try {
         await db.execute('ALTER TABLE exercises ADD COLUMN is_time_based INTEGER DEFAULT 0');
+        print('🔄 Added is_time_based column');
       } catch (e) {
-        print('Column is_time_based already exists or error: $e');
+        print('⚠️ Column is_time_based error: $e');
       }
+    }
+
+    if (oldVersion < 3) {
+      print('🔄 Migrating to v3: Recreating exercises table with proper columns');
+
+      // Sauvegarder les exercices existants (si il y en a)
+      final existingExercises = await db.query('exercises');
+      print('📦 Found ${existingExercises.length} existing exercises to backup');
+
+      // Supprimer la table exercises
+      await db.execute('DROP TABLE IF EXISTS exercises');
+      print('🗑️ Dropped old exercises table');
+
+      // Recréer la table avec toutes les colonnes
+      await db.execute('''
+        CREATE TABLE exercises (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          category TEXT NOT NULL,
+          muscle_groups TEXT NOT NULL,
+          equipment TEXT NOT NULL,
+          difficulty TEXT NOT NULL,
+          description TEXT,
+          video_url TEXT,
+          thumbnail_url TEXT,
+          is_favorite INTEGER DEFAULT 0,
+          is_time_based INTEGER DEFAULT 0
+        )
+      ''');
+      print('✅ Created new exercises table with all columns');
+
+      // Restaurer les exercices (si compatibles)
+      for (var exercise in existingExercises) {
+        try {
+          await db.insert('exercises', {
+            'id': exercise['id'],
+            'name': exercise['name'],
+            'category': exercise['category'],
+            'muscle_groups': exercise['muscle_groups'],
+            'equipment': exercise['equipment'],
+            'difficulty': exercise['difficulty'],
+            'description': exercise['description'],
+            'video_url': exercise['video_url'],
+            'thumbnail_url': null,
+            'is_favorite': exercise['is_favorite'] ?? 0,
+            'is_time_based': 0,
+          });
+        } catch (e) {
+          print('⚠️ Could not restore exercise: $e');
+        }
+      }
+      print('✅ Migration to v3 complete');
     }
   }
 
@@ -267,10 +323,18 @@ class DatabaseService {
 
   Future<List<FoodItem>> searchFoodItems(String query) async {
     final db = await database;
+    print('🔍 DB: searchFoodItems called with query="$query"');
+
     final maps = await db.query('food_items',
-        where: 'name LIKE ? OR brand LIKE ?',
+        where: 'LOWER(name) LIKE LOWER(?) OR LOWER(brand) LIKE LOWER(?)',
         whereArgs: ['%$query%', '%$query%'],
         orderBy: 'name ASC');
+
+    print('🔍 DB: Found ${maps.length} results in database');
+    if (maps.isNotEmpty) {
+      print('🔍 DB: First 3 results: ${maps.take(3).map((m) => m['name']).join(", ")}');
+    }
+
     return maps.map((map) => FoodItem.fromMap(map)).toList();
   }
 
