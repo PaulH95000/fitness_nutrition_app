@@ -108,7 +108,9 @@ class DatabaseService {
         difficulty TEXT NOT NULL,
         description TEXT,
         video_url TEXT,
-        is_favorite INTEGER DEFAULT 0
+        thumbnail_url TEXT,
+        is_favorite INTEGER DEFAULT 0,
+        is_time_based INTEGER DEFAULT 0
       )
     ''');
 
@@ -196,6 +198,19 @@ class DatabaseService {
     if (oldVersion < 2) {
       // Ajouter le champ is_rest_time_modified à la table workout_sets
       await db.execute('ALTER TABLE workout_sets ADD COLUMN is_rest_time_modified INTEGER DEFAULT 0');
+
+      // Ajouter les colonnes manquantes à la table exercises
+      try {
+        await db.execute('ALTER TABLE exercises ADD COLUMN thumbnail_url TEXT');
+      } catch (e) {
+        print('Column thumbnail_url already exists or error: $e');
+      }
+
+      try {
+        await db.execute('ALTER TABLE exercises ADD COLUMN is_time_based INTEGER DEFAULT 0');
+      } catch (e) {
+        print('Column is_time_based already exists or error: $e');
+      }
     }
   }
 
