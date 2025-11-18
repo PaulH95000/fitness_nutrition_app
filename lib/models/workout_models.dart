@@ -65,6 +65,7 @@ class WorkoutSet {
   final int? restSeconds;
   final bool completed;
   final String? notes;
+  final bool isRestTimeModified; // true si l'utilisateur a manuellement modifié le temps de repos
 
   WorkoutSet({
     required this.id,
@@ -73,6 +74,7 @@ class WorkoutSet {
     this.restSeconds,
     this.completed = false,
     this.notes,
+    this.isRestTimeModified = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -83,6 +85,7 @@ class WorkoutSet {
       'rest_seconds': restSeconds,
       'completed': completed ? 1 : 0,
       'notes': notes,
+      'is_rest_time_modified': isRestTimeModified ? 1 : 0,
     };
   }
 
@@ -94,6 +97,7 @@ class WorkoutSet {
       restSeconds: map['rest_seconds'],
       completed: map['completed'] == 1,
       notes: map['notes'],
+      isRestTimeModified: map['is_rest_time_modified'] == 1,
     );
   }
 
@@ -103,6 +107,7 @@ class WorkoutSet {
     int? restSeconds,
     bool? completed,
     String? notes,
+    bool? isRestTimeModified,
   }) {
     return WorkoutSet(
       id: id,
@@ -111,6 +116,7 @@ class WorkoutSet {
       restSeconds: restSeconds ?? this.restSeconds,
       completed: completed ?? this.completed,
       notes: notes ?? this.notes,
+      isRestTimeModified: isRestTimeModified ?? this.isRestTimeModified,
     );
   }
 }

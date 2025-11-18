@@ -125,6 +125,35 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
     });
   }
 
+  void _updateGlobalRestTime(int newRestSeconds) {
+    // Valider les limites
+    if (newRestSeconds < 30 || newRestSeconds > 300) return;
+
+    setState(() {
+      _defaultRestSeconds = newRestSeconds;
+
+      // Mettre à jour tous les sets non-modifiés
+      for (int i = 0; i < _selectedExercises.length; i++) {
+        final exercise = _selectedExercises[i];
+        final updatedSets = exercise.sets.map((set) {
+          // Ne mettre à jour que les sets dont le temps de repos n'a pas été modifié manuellement
+          if (!set.isRestTimeModified) {
+            return set.copyWith(restSeconds: newRestSeconds);
+          }
+          return set;
+        }).toList();
+
+        _selectedExercises[i] = WorkoutExercise(
+          id: exercise.id,
+          exercise: exercise.exercise,
+          sets: updatedSets,
+          order: exercise.order,
+          notes: exercise.notes,
+        );
+      }
+    });
+  }
+
   void _saveWorkout() {
     if (_nameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -224,11 +253,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                         children: [
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                if (_defaultRestSeconds > 30) {
-                                  _defaultRestSeconds -= 15;
-                                }
-                              });
+                              _updateGlobalRestTime(_defaultRestSeconds - 15);
                             },
                             icon: const Icon(Icons.remove_circle_outline),
                             color: AppTheme.primaryColor,
@@ -247,11 +272,7 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                           ),
                           IconButton(
                             onPressed: () {
-                              setState(() {
-                                if (_defaultRestSeconds < 300) {
-                                  _defaultRestSeconds += 15;
-                                }
-                              });
+                              _updateGlobalRestTime(_defaultRestSeconds + 15);
                             },
                             icon: const Icon(Icons.add_circle_outline),
                             color: AppTheme.primaryColor,
@@ -464,7 +485,10 @@ class _CreateWorkoutScreenState extends State<CreateWorkoutScreen> {
                 _updateSet(
                   exerciseIndex,
                   setIndex,
-                  set.copyWith(restSeconds: rest),
+                  set.copyWith(
+                    restSeconds: rest,
+                    isRestTimeModified: true, // Marquer comme modifié manuellement
+                  ),
                 );
               },
             ),

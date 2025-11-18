@@ -573,9 +573,16 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
                       ),
                       child: const Icon(Icons.restaurant, size: 20),
                     ),
-                    title: Text(meal.foodItem.name),
+                    title: Text(
+                      meal.foodItem.name,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
                     subtitle: Text(
-                      '${meal.quantity.toInt()}g',
+                      '${meal.quantity.toInt()}g • ${meal.foodItem.brand ?? ""}',
                       style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                     trailing: Row(
@@ -603,6 +610,16 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
                           icon: const Icon(Icons.more_vert, size: 20),
                           itemBuilder: (context) => [
                             const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, color: AppTheme.primaryColor, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Modifier'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
                               value: 'delete',
                               child: Row(
                                 children: [
@@ -614,7 +631,9 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
                             ),
                           ],
                           onSelected: (value) {
-                            if (value == 'delete') {
+                            if (value == 'edit') {
+                              _showEditMealDialog(context, provider, meal);
+                            } else if (value == 'delete') {
                               provider.deleteMealEntry(meal.id);
                               _loadDataForDate(_selectedDate);
                             }
@@ -634,6 +653,145 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
             ),
         ],
       ),
+    );
+  }
+
+  void _showEditMealDialog(BuildContext context, NutritionProvider provider, meal) {
+    final quantityController = TextEditingController(text: meal.quantity.toInt().toString());
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Modifier la quantité'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              meal.foodItem.name,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: 'Quantité (${meal.foodItem.servingUnit})',
+                hintText: 'Ex: 100',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                suffixText: meal.foodItem.servingUnit,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Aperçu nutritionnel:',
+                    style: TextStyle(
+                      color: Colors.grey[700],
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildNutrientPreview(
+                    quantityController,
+                    meal.foodItem,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final newQuantity = double.tryParse(quantityController.text);
+              if (newQuantity == null || newQuantity <= 0) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Quantité invalide')),
+                );
+                return;
+              }
+
+              // Update meal entry
+              final updatedMeal = meal.copyWith(quantity: newQuantity);
+              await provider.updateMealEntry(updatedMeal);
+
+              Navigator.pop(dialogContext);
+              _loadDataForDate(_selectedDate);
+
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Repas modifié avec succès'),
+                    backgroundColor: AppTheme.successColor,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryColor,
+            ),
+            child: const Text('Enregistrer'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNutrientPreview(TextEditingController controller, foodItem) {
+    return StreamBuilder(
+      stream: Stream.periodic(const Duration(milliseconds: 100)),
+      builder: (context, snapshot) {
+        final quantity = double.tryParse(controller.text) ?? 0;
+        final calories = foodItem.getCalories(quantity);
+        final protein = foodItem.getProtein(quantity);
+        final carbs = foodItem.getCarbs(quantity);
+        final fat = foodItem.getFat(quantity);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              '${calories.toInt()} kcal',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
+            Text(
+              'P: ${protein.toInt()}g',
+              style: TextStyle(color: AppTheme.proteinColor, fontSize: 12),
+            ),
+            Text(
+              'G: ${carbs.toInt()}g',
+              style: TextStyle(color: AppTheme.carbsColor, fontSize: 12),
+            ),
+            Text(
+              'L: ${fat.toInt()}g',
+              style: TextStyle(color: AppTheme.fatColor, fontSize: 12),
+            ),
+          ],
+        );
+      },
     );
   }
 }

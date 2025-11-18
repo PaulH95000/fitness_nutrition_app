@@ -180,6 +180,15 @@ class NutritionProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> updateMealEntry(MealEntry entry) async {
+    try {
+      await DatabaseService.instance.updateMealEntry(entry);
+      await loadTodayMeals();
+    } catch (e) {
+      print('Erreur lors de la modification: $e');
+    }
+  }
+
   Future<void> deleteMealEntry(String entryId) async {
     try {
       await DatabaseService.instance.deleteMealEntry(entryId);

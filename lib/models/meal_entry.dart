@@ -20,6 +20,22 @@ class MealEntry {
   double get totalCarbs => foodItem.getCarbs(quantity);
   double get totalFat => foodItem.getFat(quantity);
 
+  MealEntry copyWith({
+    String? id,
+    FoodItem? foodItem,
+    double? quantity,
+    DateTime? consumedAt,
+    String? mealType,
+  }) {
+    return MealEntry(
+      id: id ?? this.id,
+      foodItem: foodItem ?? this.foodItem,
+      quantity: quantity ?? this.quantity,
+      consumedAt: consumedAt ?? this.consumedAt,
+      mealType: mealType ?? this.mealType,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

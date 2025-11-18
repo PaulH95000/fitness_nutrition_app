@@ -23,8 +23,9 @@ class DatabaseService {
 
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _createDB,
+      onUpgrade: _upgradeDB,
     );
   }
 
@@ -146,6 +147,7 @@ class DatabaseService {
         rest_seconds INTEGER,
         completed INTEGER DEFAULT 0,
         notes TEXT,
+        is_rest_time_modified INTEGER DEFAULT 0,
         FOREIGN KEY (workout_exercise_id) REFERENCES workout_exercises (id)
       )
     ''');
@@ -188,6 +190,13 @@ class DatabaseService {
     await db.execute('CREATE INDEX idx_meal_entries_consumed_at ON meal_entries(consumed_at)');
     await db.execute('CREATE INDEX idx_workout_history_performed_at ON workout_history(performed_at)');
     await db.execute('CREATE INDEX idx_food_items_favorite ON food_items(is_favorite)');
+  }
+
+  Future<void> _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Ajouter le champ is_rest_time_modified à la table workout_sets
+      await db.execute('ALTER TABLE workout_sets ADD COLUMN is_rest_time_modified INTEGER DEFAULT 0');
+    }
   }
 
   // ==================== USER PROFILE ====================
@@ -289,6 +298,16 @@ class DatabaseService {
       }
     }
     return entries;
+  }
+
+  Future<void> updateMealEntry(MealEntry entry) async {
+    final db = await database;
+    await db.update(
+      'meal_entries',
+      entry.toMap(),
+      where: 'id = ?',
+      whereArgs: [entry.id],
+    );
   }
 
   Future<void> deleteMealEntry(String id) async {
