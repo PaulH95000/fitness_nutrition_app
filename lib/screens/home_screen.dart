@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'nutrition/nutrition_screen_v2.dart';
 import 'fitness/fitness_screen.dart';
+import 'history/history_screen.dart';
 import 'profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final List<Widget> _screens = [
     const NutritionScreenV2(),
     const FitnessScreen(),
+    const HistoryScreen(),
     const ProfileScreen(),
   ];
 
@@ -43,6 +45,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.fitness_center_outlined),
             selectedIcon: Icon(Icons.fitness_center),
             label: 'Fitness',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.timeline_outlined),
+            selectedIcon: Icon(Icons.timeline),
+            label: 'Historique',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
