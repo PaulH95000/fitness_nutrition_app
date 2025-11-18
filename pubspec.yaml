@@ -40,7 +40,11 @@ dependencies:
   uuid: ^4.2.1
   freezed_annotation: ^2.4.1
   json_annotation: ^4.8.1
-  
+
+  # Health & Pedometer
+  pedometer: ^4.0.1
+  permission_handler: ^11.0.1
+
   # Animations
   animations: ^2.0.11
   shimmer: ^3.0.0

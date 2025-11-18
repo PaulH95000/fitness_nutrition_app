@@ -47,5 +47,11 @@
 	<true/>
 	<key>NSCameraUsageDescription</key>
 	<string>L'application a besoin d'accéder à la caméra pour scanner les codes-barres des produits alimentaires.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>L'application a besoin d'accéder aux données de mouvement pour compter vos pas quotidiens.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>L'application souhaite lire vos données de santé pour afficher votre nombre de pas.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>L'application souhaite mettre à jour vos données de santé.</string>
 </dict>
 </plist>
