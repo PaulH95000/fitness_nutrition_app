@@ -605,11 +605,30 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
                   ),
                 ))
           else
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Appuyez pour ajouter un aliment',
-                style: TextStyle(color: Colors.grey[400], fontSize: 13),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AddMealScreen(
+                      selectedDate: _selectedDate,
+                      initialMealType: mealType,
+                    ),
+                  ),
+                ).then((_) => _loadDataForDate(_selectedDate));
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Icon(Icons.add_circle_outline, color: Colors.grey[400], size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Appuyez pour ajouter un aliment',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14, fontWeight: FontWeight.w500),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

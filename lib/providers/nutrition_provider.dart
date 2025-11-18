@@ -100,8 +100,13 @@ class NutritionProvider extends ChangeNotifier {
   }
 
   Future<void> searchFood(String query) async {
-    if (query.isEmpty) {
+    final trimmedQuery = query.trim();
+    print('🔍 searchFood called with query: "$trimmedQuery"');
+
+    if (trimmedQuery.isEmpty) {
+      print('🔍 Query empty, clearing results');
       _searchResults = [];
+      _isSearching = false;
       notifyListeners();
       return;
     }
@@ -111,27 +116,35 @@ class NutritionProvider extends ChangeNotifier {
 
     try {
       // Chercher d'abord dans la base locale
-      final localResults = await DatabaseService.instance.searchFoodItems(query);
-      print('Recherche "${query}": ${localResults.length} résultats locaux trouvés');
+      final localResults = await DatabaseService.instance.searchFoodItems(trimmedQuery);
+      print('🔍 Recherche locale "$trimmedQuery": ${localResults.length} résultats trouvés');
+
+      // Debug: afficher les noms des premiers résultats
+      if (localResults.isNotEmpty) {
+        print('🔍 Premiers résultats: ${localResults.take(3).map((f) => f.name).join(", ")}');
+      }
 
       // Si on a assez de résultats locaux, ne pas chercher dans l'API
       if (localResults.length >= 5) {
         _searchResults = localResults;
-        print('Assez de résultats locaux, pas de recherche API');
+        print('🔍 Assez de résultats locaux (${localResults.length}), pas de recherche API');
       } else {
         // Sinon, chercher dans l'API OpenFoodFacts et limiter les résultats
         try {
-          final apiResults = await _foodApiService.searchFood(query);
-          print('Recherche API: ${apiResults.length} résultats');
+          print('🔍 Lancement recherche API...');
+          final apiResults = await _foodApiService.searchFood(trimmedQuery);
+          print('🔍 Recherche API: ${apiResults.length} résultats');
           // Limiter les résultats API à 10 et combiner avec les résultats locaux
           _searchResults = [...localResults, ...apiResults.take(10)];
         } catch (e) {
-          print('Erreur API, utilisation résultats locaux uniquement: $e');
+          print('⚠️ Erreur API, utilisation résultats locaux uniquement: $e');
           _searchResults = localResults;
         }
       }
+
+      print('🔍 Total résultats finaux: ${_searchResults.length}');
     } catch (e) {
-      print('Erreur lors de la recherche: $e');
+      print('❌ Erreur lors de la recherche: $e');
       _searchResults = [];
     }
 

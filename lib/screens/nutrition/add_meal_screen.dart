@@ -111,20 +111,37 @@ class _AddMealScreenState extends State<AddMealScreen> {
             Expanded(
               child: Consumer<NutritionProvider>(
                 builder: (context, provider, child) {
-                  if (_searchController.text.isEmpty) {
+                  // Debug: afficher les infos de recherche
+                  print('🔍 Search text: "${_searchController.text}", Results: ${provider.searchResults.length}, IsSearching: ${provider.isSearching}');
+
+                  // Si pas de texte de recherche, afficher favoris/récents
+                  if (_searchController.text.trim().isEmpty) {
                     return _buildQuickAccessLists(provider);
                   }
-                  
+
+                  // Si recherche en cours
                   if (provider.isSearching) {
                     return const Center(child: CircularProgressIndicator());
                   }
-                  
+
+                  // Si aucun résultat
                   if (provider.searchResults.isEmpty) {
-                    return const Center(
-                      child: Text('Aucun résultat trouvé'),
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun résultat pour "${_searchController.text}"',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
                     );
                   }
-                  
+
+                  // Afficher les résultats de recherche
                   return ListView.builder(
                     itemCount: provider.searchResults.length,
                     itemBuilder: (context, index) {

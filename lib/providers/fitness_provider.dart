@@ -23,28 +23,36 @@ class FitnessProvider extends ChangeNotifier {
   bool get hasActiveWorkout => _currentWorkout != null && _currentWorkout!.isInProgress;
 
   Future<void> loadExercises() async {
+    print('🏋️ loadExercises: Starting...');
     _isLoading = true;
     notifyListeners();
 
     try {
       _exercises = await DatabaseService.instance.getAllExercises();
+      print('🏋️ loadExercises: Loaded ${_exercises.length} exercises from database');
 
       // Si aucun exercice, créer une base d'exercices par défaut
       if (_exercises.isEmpty) {
+        print('🏋️ loadExercises: No exercises found, creating default exercises...');
         await _createDefaultExercises();
         _exercises = await DatabaseService.instance.getAllExercises();
+        print('🏋️ loadExercises: After creating defaults, we have ${_exercises.length} exercises');
       }
 
       _favoriteExercises = _exercises.where((e) => e.isFavorite).toList();
-    } catch (e) {
-      print('Erreur lors du chargement des exercices: $e');
+      print('🏋️ loadExercises: ${_favoriteExercises.length} favorite exercises');
+    } catch (e, stack) {
+      print('❌ Erreur lors du chargement des exercices: $e');
+      print('Stack trace: $stack');
     }
 
     _isLoading = false;
     notifyListeners();
+    print('🏋️ loadExercises: Complete with ${_exercises.length} total exercises');
   }
 
   Future<void> _createDefaultExercises() async {
+    print('🏋️ _createDefaultExercises: Creating default exercises...');
     final defaultExercises = [
       // Pectoraux
       Exercise(
@@ -676,9 +684,15 @@ class FitnessProvider extends ChangeNotifier {
       ),
     ];
 
+    print('🏋️ _createDefaultExercises: Inserting ${defaultExercises.length} exercises into database...');
     for (var exercise in defaultExercises) {
-      await DatabaseService.instance.insertExercise(exercise);
+      try {
+        await DatabaseService.instance.insertExercise(exercise);
+      } catch (e) {
+        print('❌ Error inserting exercise "${exercise.name}": $e');
+      }
     }
+    print('🏋️ _createDefaultExercises: Finished inserting exercises');
   }
 
   // Gestion des séances templates (sauvegardées)

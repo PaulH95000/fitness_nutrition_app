@@ -53,7 +53,12 @@ class _HistoryScreenState extends State<HistoryScreen> with SingleTickerProvider
   void _onStepCount(StepCount event) {
     if (mounted) {
       setState(() {
+        // IMPORTANT: Sur iOS, event.steps représente le nombre cumulé de pas depuis le démarrage
+        // de l'appareil (ou depuis minuit selon la config). Pour obtenir les vrais pas du jour,
+        // il faudrait utiliser HealthKit directement via un package comme 'health' ou 'fit_kit'.
+        // Pour l'instant, on affiche la valeur brute du pedometer.
         _steps = event.steps.toString();
+        print('🚶 Steps received from pedometer: ${event.steps}');
       });
     }
   }

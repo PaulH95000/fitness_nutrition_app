@@ -378,13 +378,17 @@ class DatabaseService {
   
   Future<void> insertExercise(Exercise exercise) async {
     final db = await database;
+    print('🏋️ DB: Inserting exercise "${exercise.name}"...');
     await db.insert('exercises', exercise.toMap(),
         conflictAlgorithm: ConflictAlgorithm.replace);
+    print('🏋️ DB: Exercise "${exercise.name}" inserted successfully');
   }
 
   Future<List<Exercise>> getAllExercises() async {
     final db = await database;
+    print('🏋️ DB: Querying all exercises...');
     final maps = await db.query('exercises', orderBy: 'name ASC');
+    print('🏋️ DB: Found ${maps.length} exercises in database');
     return maps.map((map) => Exercise.fromMap(map)).toList();
   }
 
