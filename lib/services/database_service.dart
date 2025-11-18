@@ -291,12 +291,38 @@ class DatabaseService {
     final db = await database;
     final startOfDay = DateTime(date.year, date.month, date.day);
     final endOfDay = startOfDay.add(const Duration(days: 1));
-    
+
     final maps = await db.query('meal_entries',
         where: 'consumed_at >= ? AND consumed_at < ?',
         whereArgs: [startOfDay.toIso8601String(), endOfDay.toIso8601String()],
         orderBy: 'consumed_at ASC');
-    
+
+    final List<MealEntry> entries = [];
+    for (var map in maps) {
+      final foodMaps = await db.query('food_items',
+          where: 'id = ?', whereArgs: [map['food_id']]);
+      if (foodMaps.isNotEmpty) {
+        final food = FoodItem.fromMap(foodMaps.first);
+        entries.add(MealEntry(
+          id: map['id'] as String,
+          foodItem: food,
+          quantity: map['quantity'] as double,
+          consumedAt: DateTime.parse(map['consumed_at'] as String),
+          mealType: map['meal_type'] as String,
+        ));
+      }
+    }
+    return entries;
+  }
+
+  Future<List<MealEntry>> getMealEntriesByDateRange(DateTime startDate, DateTime endDate) async {
+    final db = await database;
+
+    final maps = await db.query('meal_entries',
+        where: 'consumed_at >= ? AND consumed_at < ?',
+        whereArgs: [startDate.toIso8601String(), endDate.toIso8601String()],
+        orderBy: 'consumed_at ASC');
+
     final List<MealEntry> entries = [];
     for (var map in maps) {
       final foodMaps = await db.query('food_items',
