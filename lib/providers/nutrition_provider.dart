@@ -3,6 +3,7 @@ import '../models/food_item.dart';
 import '../models/meal_entry.dart';
 import '../services/database_service.dart';
 import '../services/food_api_service.dart';
+import '../data/default_foods.dart';
 import 'package:uuid/uuid.dart';
 
 class NutritionProvider extends ChangeNotifier {
@@ -29,6 +30,22 @@ class NutritionProvider extends ChangeNotifier {
   double get todayProtein => _todayMeals.fold(0, (sum, meal) => sum + meal.totalProtein);
   double get todayCarbs => _todayMeals.fold(0, (sum, meal) => sum + meal.totalCarbs);
   double get todayFat => _todayMeals.fold(0, (sum, meal) => sum + meal.totalFat);
+
+  Future<void> initializeDefaultFoods() async {
+    try {
+      final allFoods = await DatabaseService.instance.getAllFoodItems();
+      if (allFoods.isEmpty) {
+        // Ajouter les aliments par défaut
+        final defaultFoods = DefaultFoods.getDefaultFrenchFoods();
+        for (final food in defaultFoods) {
+          await DatabaseService.instance.insertFoodItem(food);
+        }
+        print('${defaultFoods.length} aliments par défaut ajoutés');
+      }
+    } catch (e) {
+      print('Erreur lors de l\'initialisation des aliments: $e');
+    }
+  }
 
   Future<void> loadTodayMeals() async {
     await loadMealsForDate(DateTime.now());

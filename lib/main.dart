@@ -21,6 +21,48 @@ void main() async {
   runApp(const MyApp());
 }
 
+class MyAppInitializer extends StatefulWidget {
+  final Widget child;
+
+  const MyAppInitializer({super.key, required this.child});
+
+  @override
+  State<MyAppInitializer> createState() => _MyAppInitializerState();
+}
+
+class _MyAppInitializerState extends State<MyAppInitializer> {
+  bool _isInitialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    // Initialiser les aliments par défaut
+    await context.read<NutritionProvider>().initializeDefaultFoods();
+    // Initialiser les exercices par défaut
+    await context.read<FitnessProvider>().loadExercises();
+
+    setState(() {
+      _isInitialized = true;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+    return widget.child;
+  }
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -38,7 +80,7 @@ class MyApp extends StatelessWidget {
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
         themeMode: ThemeMode.system,
-        home: const HomeScreen(),
+        home: const MyAppInitializer(child: HomeScreen()),
       ),
     );
   }
