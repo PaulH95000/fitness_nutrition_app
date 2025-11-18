@@ -177,7 +177,10 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           IconButton(
-            icon: const Icon(Icons.chevron_left),
+            icon: const Icon(
+              Icons.chevron_left,
+              color: Colors.black87,
+            ),
             onPressed: () => _changeDate(-1),
           ),
           const SizedBox(width: 16),
@@ -348,118 +351,76 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
             'Macronutriments',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          const SizedBox(height: 20),
-          Row(
-            children: [
-              // Circular chart
-              Expanded(
-                child: AspectRatio(
-                  aspectRatio: 1,
-                  child: PieChart(
-                    PieChartData(
-                      sectionsSpace: 2,
-                      centerSpaceRadius: 50,
-                      sections: [
-                        PieChartSectionData(
-                          value: provider.todayProtein,
-                          color: AppTheme.proteinColor,
-                          title: '${provider.todayProtein.toInt()}g',
-                          radius: 60,
-                          titleStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        PieChartSectionData(
-                          value: provider.todayCarbs,
-                          color: AppTheme.carbsColor,
-                          title: '${provider.todayCarbs.toInt()}g',
-                          radius: 60,
-                          titleStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        PieChartSectionData(
-                          value: provider.todayFat,
-                          color: AppTheme.fatColor,
-                          title: '${provider.todayFat.toInt()}g',
-                          radius: 60,
-                          titleStyle: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 20),
-              // Legend
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildMacroLegend(
-                      'Protéines',
-                      provider.todayProtein,
-                      userProfile.proteinTarget.toDouble(),
-                      AppTheme.proteinColor,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildMacroLegend(
-                      'Glucides',
-                      provider.todayCarbs,
-                      userProfile.carbsTarget.toDouble(),
-                      AppTheme.carbsColor,
-                    ),
-                    const SizedBox(height: 12),
-                    _buildMacroLegend(
-                      'Lipides',
-                      provider.todayFat,
-                      userProfile.fatTarget.toDouble(),
-                      AppTheme.fatColor,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const SizedBox(height: 16),
+          _buildSimpleMacroRow(
+            'Protéines',
+            provider.todayProtein,
+            userProfile.proteinTarget.toDouble(),
+            AppTheme.proteinColor,
+          ),
+          const SizedBox(height: 16),
+          _buildSimpleMacroRow(
+            'Glucides',
+            provider.todayCarbs,
+            userProfile.carbsTarget.toDouble(),
+            AppTheme.carbsColor,
+          ),
+          const SizedBox(height: 16),
+          _buildSimpleMacroRow(
+            'Lipides',
+            provider.todayFat,
+            userProfile.fatTarget.toDouble(),
+            AppTheme.fatColor,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMacroLegend(String label, double current, double target, Color color) {
-    final percentage = (current / target * 100).toInt();
+  Widget _buildSimpleMacroRow(String label, double current, double target, Color color) {
+    final percentage = target > 0 ? (current / target).clamp(0.0, 1.0) : 0.0;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Container(
-              width: 12,
-              height: 12,
-              decoration: BoxDecoration(
-                color: color,
-                shape: BoxShape.circle,
-              ),
+            Row(
+              children: [
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                ),
+              ],
             ),
-            const SizedBox(width: 8),
             Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+              '${current.toInt()}g / ${target.toInt()}g',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: percentage > 1.0 ? Colors.red : Colors.black87,
+              ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
-        Text(
-          '${current.toInt()}g / ${target.toInt()}g ($percentage%)',
-          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+        const SizedBox(height: 8),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: LinearProgressIndicator(
+            value: percentage,
+            minHeight: 10,
+            backgroundColor: color.withOpacity(0.2),
+            valueColor: AlwaysStoppedAnimation<Color>(color),
+          ),
         ),
       ],
     );

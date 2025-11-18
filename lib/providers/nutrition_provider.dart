@@ -112,12 +112,24 @@ class NutritionProvider extends ChangeNotifier {
     try {
       // Chercher d'abord dans la base locale
       final localResults = await DatabaseService.instance.searchFoodItems(query);
-      
-      // Puis chercher dans l'API OpenFoodFacts
-      final apiResults = await _foodApiService.searchFood(query);
-      
-      // Combiner les résultats (locaux en premier)
-      _searchResults = [...localResults, ...apiResults];
+      print('Recherche "${query}": ${localResults.length} résultats locaux trouvés');
+
+      // Si on a assez de résultats locaux, ne pas chercher dans l'API
+      if (localResults.length >= 5) {
+        _searchResults = localResults;
+        print('Assez de résultats locaux, pas de recherche API');
+      } else {
+        // Sinon, chercher dans l'API OpenFoodFacts et limiter les résultats
+        try {
+          final apiResults = await _foodApiService.searchFood(query);
+          print('Recherche API: ${apiResults.length} résultats');
+          // Limiter les résultats API à 10 et combiner avec les résultats locaux
+          _searchResults = [...localResults, ...apiResults.take(10)];
+        } catch (e) {
+          print('Erreur API, utilisation résultats locaux uniquement: $e');
+          _searchResults = localResults;
+        }
+      }
     } catch (e) {
       print('Erreur lors de la recherche: $e');
       _searchResults = [];
