@@ -286,7 +286,13 @@ class _FitnessScreenState extends State<FitnessScreen> {
       color: AppTheme.accentColor.withOpacity(0.1),
       child: InkWell(
         onTap: () {
-          // TODO: Naviguer vers la séance en cours
+          // Naviguer vers la séance en cours
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => CreateWorkoutScreen(workoutToEdit: workout),
+            ),
+          );
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(

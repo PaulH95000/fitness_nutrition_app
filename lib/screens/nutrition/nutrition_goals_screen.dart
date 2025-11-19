@@ -337,10 +337,12 @@ class _NutritionGoalsScreenState extends State<NutritionGoalsScreen> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     isDense: true,
+                    hintStyle: TextStyle(color: Colors.grey),
                   ),
                   validator: validator,
                 ),

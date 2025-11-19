@@ -40,10 +40,22 @@ class _MyAppInitializerState extends State<MyAppInitializer> {
   }
 
   Future<void> _initialize() async {
-    // Initialiser les aliments par défaut
-    await context.read<NutritionProvider>().initializeDefaultFoods();
-    // Initialiser les exercices par défaut
-    await context.read<FitnessProvider>().loadExercises();
+    print('🚀 App Initialization starting...');
+
+    try {
+      // Initialiser les aliments par défaut
+      print('🚀 Initializing nutrition provider...');
+      await context.read<NutritionProvider>().initializeDefaultFoods();
+
+      // Initialiser les exercices par défaut
+      print('🚀 Initializing fitness provider...');
+      await context.read<FitnessProvider>().loadExercises();
+
+      print('✅ App Initialization complete!');
+    } catch (e, stack) {
+      print('❌ App Initialization ERROR: $e');
+      print('Stack: $stack');
+    }
 
     setState(() {
       _isInitialized = true;

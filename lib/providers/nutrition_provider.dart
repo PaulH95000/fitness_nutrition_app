@@ -32,18 +32,36 @@ class NutritionProvider extends ChangeNotifier {
   double get todayFat => _todayMeals.fold(0, (sum, meal) => sum + meal.totalFat);
 
   Future<void> initializeDefaultFoods() async {
+    print('🍎 initializeDefaultFoods: Starting...');
     try {
       final allFoods = await DatabaseService.instance.getAllFoodItems();
+      print('🍎 Found ${allFoods.length} existing foods in database');
+
       if (allFoods.isEmpty) {
-        // Ajouter les aliments par défaut
+        print('🍎 Database is empty, inserting default foods...');
         final defaultFoods = DefaultFoods.getDefaultFrenchFoods();
+        print('🍎 Generated ${defaultFoods.length} default foods');
+
+        int inserted = 0;
         for (final food in defaultFoods) {
-          await DatabaseService.instance.insertFoodItem(food);
+          try {
+            await DatabaseService.instance.insertFoodItem(food);
+            inserted++;
+          } catch (e) {
+            print('❌ Error inserting food "${food.name}": $e');
+          }
         }
-        print('${defaultFoods.length} aliments par défaut ajoutés');
+        print('✅ ${inserted}/${defaultFoods.length} aliments par défaut insérés avec succès');
+
+        // Vérifier qu'ils sont bien là
+        final verifyFoods = await DatabaseService.instance.getAllFoodItems();
+        print('🔍 Verification: ${verifyFoods.length} foods now in database');
+      } else {
+        print('🍎 Database already has foods, skipping initialization');
       }
-    } catch (e) {
-      print('Erreur lors de l\'initialisation des aliments: $e');
+    } catch (e, stack) {
+      print('❌ Erreur lors de l\'initialisation des aliments: $e');
+      print('Stack: $stack');
     }
   }
 
