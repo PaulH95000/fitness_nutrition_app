@@ -9,6 +9,7 @@ import 'add_meal_screen.dart';
 import 'meal_planner_screen.dart';
 import 'weekly_report_screen.dart';
 import 'nutrition_goals_screen.dart';
+import '../profile/calculators_screen.dart';
 
 /// Interface Nutrition inspirée de MyFitnessPal
 /// Design moderne, clair et intuitif
@@ -77,6 +78,16 @@ class _NutritionScreenV2State extends State<NutritionScreenV2> {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MealPlannerScreen()),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.calculate, color: Colors.orange),
+            tooltip: 'Calculateurs',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const CalculatorsScreen()),
               );
             },
           ),
